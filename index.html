@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible"
+        content="IE=edge">
+  <title>DEMO</title>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+
+  <style>
+    legend {
+        background-color: #000;
+        color: #fff;
+        padding: 3px 6px;
+    }
+
+    label {
+        margin-top: 1rem;
+        display: block;
+        font-size: .8rem;
+    }
+</style>
+</head>
+
+<body>
+  <fieldset>
+    <legend>Controls</legend>
+    <label for="slice">Slice <span id="slice-number"></span></label>
+    <input type="range"
+           id="slice"
+           name="slice"
+           value="0"
+           min="1"
+           max="" />
+
+    <label for="axial">Axial</label>
+    <input type="radio"
+           id="axial"
+           name="axis"
+           value="axial"
+           checked />
+
+    <label for="sagittal">Sagittal</label>
+    <input type="radio"
+           id="sagittal"
+           name="axis"
+           value="sagittal" />
+
+    <label for="coronal">Coronal</label>
+    <input type="radio"
+           id="coronal"
+           name="axis"
+           value="coronal" />
+
+    <label for="oblique">Oblique</label>
+    <input type="radio"
+           id="oblique"
+           name="axis"
+           value="oblique" />
+  </fieldset>
+  <div id="viewport"
+       style="width: 512px; height: 512px;"></div>
+  <script src="dist/bundle.js"></script>
+</body>
+
+</html>

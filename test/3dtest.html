@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible"
+        content="IE=edge">
+  <title>demo</title>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0;
+    }
+
+    canvas {
+      width: 500px;
+      height: 500px
+    }
+  </style>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/97/three.min.js"></script>
+
+</head>
+
+<body>
+  x:
+  <input type="range" value="1" min="0" max="1" step="0.1" id="planex" />
+  <br>
+  y:
+  <input type="range" value="0" min="0" max="1" step="0.1" id="planey" />
+  <br>
+  z:
+  <input type="range" value="0" min="0" max="1" step="0.1" id="planez" />
+  <br>
+  const:
+  <!-- <input type="range" value="0" min="0" max="90" step="1" id="const" /> -->
+  <!-- <input type="text" value="0" id="const" /> -->
+  <button type="button" id="const">Rotate</button>
+  <button type="button" id="translate">translate</button>
+  <br>
+  <button type="button" id="camera">rotate camera</button>
+  <br>
+
+  <canvas id="viewport"></canvas>
+  <!-- <script src="../dist/rect.js"></script> -->
+  <script src="../dist/threetest.js"></script>
+</body>
+
+</html>
