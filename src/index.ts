@@ -49,14 +49,14 @@ function updateSliceRange() {
 }
 
 function updateAxis() {
-  axis = (<HTMLInputElement>document.querySelector('input[name="axis"]:checked')).value;
-  updateSliceRange();
-  updateViewport();
+  // axis = (<HTMLInputElement>document.querySelector('input[name="axis"]:checked')).value;
+  // updateSliceRange();
+  // updateViewport();
 }
 
 function updateSlice() {
   slice = parseInt((<HTMLInputElement>document.getElementById('slice')).value, 10) - 1;
-  updateViewport();
+  updateViewport([0, 0, 1], [0, 0, slice]);
   document.getElementById('slice-number').innerHTML = (slice + 1).toString();
 }
 
@@ -81,9 +81,8 @@ function main() {
 
   // load the image and display it
   cornerstone.loadImage(volumeId, {
-    stack,
-    plane: 'axial',
-    slice: 0,
+    planeNormal: [0, 0, 1],
+    planeNormalOrigin: [100, 100, 0],
   }).then(function(imageData: any) {
     // console.log(imageData);
     shape = imageData.volumeShape;
@@ -93,11 +92,13 @@ function main() {
 
 main();
 
-function updateViewport() {
+function updateViewport(planeNormal: Array<number>, planeNormalOrigin: Array<number>) {
+  console.time('slicetotal');
   cornerstone.loadImage(volumeId, {
-    axis,
-    slice,
+    planeNormal,
+    planeNormalOrigin,
   }).then(function(imageData: any) {
+    console.timeEnd('slicetotal');
     cornerstone.displayImage(element, imageData.image);
   });
 }

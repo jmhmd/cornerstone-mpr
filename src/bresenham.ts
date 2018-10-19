@@ -1,11 +1,14 @@
+import { isUndefined } from "util";
+
 // https://www.geeksforgeeks.org/bresenhams-algorithm-for-3-d-line-drawing/
 // http://members.chello.at/~easyfilter/bresenham.html
 
 function bresenham3D(point1: Array<number>, point2: Array<number>) {
-  let [x1, y1, z1] = point1;
-  let [x2, y2, z2] = point2;
+  let [x1, y1, z1] = point1.map(Math.ceil);
+  let [x2, y2, z2] = point2.map(Math.ceil);
   const hasNaN = [...point1, ...point2].filter(isNaN);
-  if (hasNaN.length > 0) throw new Error('Invalid coordinate');
+  const hasUndefined = [...point1, ...point2].filter(p => p === undefined);
+  if (hasNaN.length > 0 || hasUndefined.length > 0) throw new Error('Invalid coordinate');
 
   const listOfPoints: Array<Array<number>> = [];
   listOfPoints.push([x1, y1, z1]);

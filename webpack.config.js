@@ -2,8 +2,9 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    // main: './src/index.ts',
-    threetest: './test/threetest.js',
+    main: './src/index.ts',
+    // threetest: './test/threetest.js',
+    // calipers: './test/calipers-test.js'
   },
   devtool: 'inline-source-map',
   target: 'web',
@@ -16,7 +17,15 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true,
+              experimentalWatchApi: true,
+            }
+          }
+        ],
         exclude: /node_modules/,
       },
     ],

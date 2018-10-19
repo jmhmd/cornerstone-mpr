@@ -1,10 +1,12 @@
-import { getSlabCoordinates } from "./get-slab-coordinates";
+import { getSlabCoordinates } from './get-slab-coordinates';
 
 const { getPlane } = require('./bresenham');
 
 function get2DPixelsFromMap(volume: any, sliceMap: Array<Array<Array<number>>>) {
   const { xPixelWidth, yPixelWidth, zPixelWidth, minPixelDimension, volumeArray } = volume;
-  let pixels = [];
+  const pixelLength = sliceMap.reduce((prev, row) => prev + row.length, 0);
+  let pixels = new Int16Array(pixelLength);
+  let offset = 0;
   for (let i = 0; i < sliceMap.length; i++) {
     const mapRow: Array<Array<number>> = sliceMap[i];
     for (let j = 0; j < mapRow.length; j++) {
@@ -16,7 +18,8 @@ function get2DPixelsFromMap(volume: any, sliceMap: Array<Array<Array<number>>>) 
       const volumeZmm = mapVoxel[2] * minPixelDimension;
       const volumeVoxelZ = Math.floor(volumeZmm / zPixelWidth); // maybe should be doing some averaging here?
       const slabPixel = volumeArray.get(volumeVoxelZ, volumeVoxelX, volumeVoxelY);
-      pixels.push(slabPixel);
+      pixels.set([slabPixel], offset);
+      offset += 1;
     }
   }
   return pixels;
@@ -33,12 +36,24 @@ async function getImage(volume: any, opts: any) {
     volumeArray,
   } = volume.data;
 
-  const sliceBoundingBoxCoordinates = getSlabCoordinates(planeNormal, planeNormalOrigin, gridMapDimensions);
+  console.time('get-slab-coordinates');
+
+  const sliceBoundingBoxCoordinates = getSlabCoordinates(
+    planeNormal,
+    planeNormalOrigin,
+    gridMapDimensions
+  );
+
+  console.timeEnd('get-slab-coordinates');
 
   /**
    * Use 3D grid where 1 unit = smallest pixel spacing
    */
+  console.time('get-plane');
+
   const sliceMap = getPlane(...sliceBoundingBoxCoordinates);
+
+  console.timeEnd('get-plane');
   // let sliceMap: Array<Array<Array<number>>>;
   // const [mapColumns, mapRows, mapSlices] = gridMapDimensions;
 
@@ -81,11 +96,17 @@ async function getImage(volume: any, opts: any) {
   //   );
   // }
 
+  console.time('get-pixels');
+
   const pixels = get2DPixelsFromMap(volume.data, sliceMap);
 
-  const pixelData = Int16Array.from(pixels);
+  console.timeEnd('get-pixels');
+
+  // console.time('construct-array');
+  // const pixelData = Int16Array.from(pixels);
+  // console.timeEnd('construct-array');
   const image = {
-    pixelData,
+    pixels,
     image: Object.assign(volume.data.firstImage, {
       imageId: Date.now(), // cache bust
       rowPixelSpacing: minPixelDimension,
@@ -95,7 +116,7 @@ async function getImage(volume: any, opts: any) {
       height: sliceMap.length,
       width: sliceMap[0].length,
       getPixelData() {
-        return pixelData;
+        return pixels;
       },
     }),
     volumeShape: volumeArray.shape,
