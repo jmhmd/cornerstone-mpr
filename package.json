@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@types/node": "^10.11.5",
+    "@types/three": "^0.93.4",
     "convex-hull": "^1.0.3",
     "cornerstone-core": "^2.2.6",
     "cornerstone-math": "^0.1.6",

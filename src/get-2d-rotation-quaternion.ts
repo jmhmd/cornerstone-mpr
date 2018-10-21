@@ -1,6 +1,9 @@
-const { Vector3, Quaternion } = require('three');
+import { Vector3, Quaternion } from 'three';
 
-function get2dRotationQuaternion(normal, destNormal = new Vector3(0, 0, 1)) {
+function get2dRotationQuaternion(
+  normal: Vector3,
+  destNormal: Vector3 = new Vector3(0, 0, 1)
+): Quaternion {
   /**
    * Do math I don't understand:
    *
@@ -8,18 +11,18 @@ function get2dRotationQuaternion(normal, destNormal = new Vector3(0, 0, 1)) {
    * and
    * https://stackoverflow.com/questions/19211815/rotating-arbitrary-plane-to-be-z-axis-aligned?rq=1
    */
-  const axis = normal
+  const axis: Vector3 = normal
     .clone()
     .normalize()
     .cross(destNormal)
     .normalize();
-  const angle = Math.acos(
+  const angle: number = Math.acos(
     normal
       .clone()
       .normalize()
       .dot(destNormal)
   );
-  const quat = new Quaternion().setFromAxisAngle(axis, angle);
+  const quat: Quaternion = new Quaternion().setFromAxisAngle(axis, angle);
   return quat;
 }
 

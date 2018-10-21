@@ -6,7 +6,8 @@ module.exports = {
     // threetest: './test/threetest.js',
     // calipers: './test/calipers-test.js'
   },
-  devtool: 'inline-source-map',
+  mode: 'development',
+  devtool: 'source-map',
   target: 'web',
   // node: {
   //   console: true,
@@ -21,8 +22,8 @@ module.exports = {
           {
             loader: 'ts-loader',
             options: {
-              transpileOnly: true,
-              experimentalWatchApi: true,
+              // transpileOnly: true,
+              // experimentalWatchApi: true,
             }
           }
         ],

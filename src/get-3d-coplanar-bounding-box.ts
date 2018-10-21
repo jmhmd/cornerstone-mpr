@@ -1,25 +1,34 @@
-const { get2dRotationQuaternion } = require('./get-2d-rotation-quaternion');
-const { Vector3 } = require('three');
-const RotatingCalipers = require('rotating-calipers');
+import { get2dRotationQuaternion } from './get-2d-rotation-quaternion';
+import { Vector3 } from 'three';
+// const RotatingCalipers = require('rotating-calipers');
 
-function get3dCoplanarBoundingBox(vertices, normal) {
+function get3dCoplanarBoundingBox(vertices: Array<Vector3>, normal: Vector3): Array<Array<number>> {
   /**
    * Get rotation quaternion that will transform points to be coplanar to an axis (z)
    */
   const rotationQuaternion = get2dRotationQuaternion(normal, new Vector3(0, 0, 1));
-  const inPlaneVertices = [];
+  const inPlaneVertices: Array<Vector3> = [];
+  let bbVertices: Array<Vector3>;
+
+  /**
+   * Rotate given 3d coplanar vertices to z-plane
+   */
   vertices.forEach(i => {
     inPlaneVertices.push(i.clone().applyQuaternion(rotationQuaternion));
   });
 
   /**
-   * Simple axis-aligned bounding box
+   * Construct simple axis-aligned bounding box in 2d
    */
   const maxX = Math.max(...inPlaneVertices.map(v => v.x));
   const maxY = Math.max(...inPlaneVertices.map(v => v.y));
   const minX = Math.min(...inPlaneVertices.map(v => v.x));
   const minY = Math.min(...inPlaneVertices.map(v => v.y));
-  const bbVertices = [
+
+  /**
+   * Apply common z-axis dimension
+   */
+  bbVertices = [
     new Vector3(minX, minY, inPlaneVertices[0].z),
     new Vector3(maxX, minY, inPlaneVertices[0].z),
     new Vector3(minX, maxY, inPlaneVertices[0].z),
@@ -38,7 +47,7 @@ function get3dCoplanarBoundingBox(vertices, normal) {
   /**
    * Rotate bounding box points back to original plane
    */
-  const rotatedBB = [];
+  const rotatedBB: Array<Vector3> = [];
   bbVertices.forEach(v => {
     rotatedBB.push(v.clone().applyQuaternion(rotationQuaternion.clone().inverse()));
   });

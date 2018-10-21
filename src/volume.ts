@@ -29,14 +29,11 @@ async function getImage(volume: any, opts: any) {
   const { planeNormal, planeNormalOrigin } = opts;
   const {
     gridMapDimensions,
-    rows,
-    columns,
-    numSlices,
     minPixelDimension,
     volumeArray,
   } = volume.data;
 
-  console.time('get-slab-coordinates');
+  // console.time('get-slab-coordinates');
 
   const sliceBoundingBoxCoordinates = getSlabCoordinates(
     planeNormal,
@@ -44,63 +41,22 @@ async function getImage(volume: any, opts: any) {
     gridMapDimensions
   );
 
-  console.timeEnd('get-slab-coordinates');
+  // console.timeEnd('get-slab-coordinates');
 
   /**
    * Use 3D grid where 1 unit = smallest pixel spacing
    */
-  console.time('get-plane');
+  // console.time('get-plane');
 
   const sliceMap = getPlane(...sliceBoundingBoxCoordinates);
 
-  console.timeEnd('get-plane');
-  // let sliceMap: Array<Array<Array<number>>>;
-  // const [mapColumns, mapRows, mapSlices] = gridMapDimensions;
+  // console.timeEnd('get-plane');
 
-  // if (oAxis === 'coronal') {
-  //   const unitsPerSlice = gridMapDimensions[1] / rows;
-  //   const mapSlice = sliceIndex * unitsPerSlice;
-  //   sliceMap = getPlane(
-  //     [0, mapSlice, mapSlices - 1],
-  //     [mapColumns - 1, mapSlice, mapSlices - 1],
-  //     [0, mapSlice, 0],
-  //     [mapColumns - 1, mapSlice, 0]
-  //   );
-  // } else if (oAxis === 'sagittal') {
-  //   const unitsPerSlice = gridMapDimensions[0] / columns;
-  //   const mapSlice = sliceIndex * unitsPerSlice;
-  //   sliceMap = getPlane(
-  //     [mapSlice, mapRows - 1, mapSlices - 1],
-  //     [mapSlice, 0, mapSlices - 1],
-  //     [mapSlice, mapRows - 1, 0],
-  //     [mapSlice, 0, 0]
-  //   );
-  // } else if (oAxis === 'oblique') {
-  //   const unitsPerSlice = gridMapDimensions[0] / columns;
-  //   const mapSlice = sliceIndex * unitsPerSlice;
-  //   sliceMap = getPlane(
-  //     [0, 0, 190],
-  //     [0, mapRows - 1, 2],
-  //     [mapColumns - 1, 0, 190],
-  //     [mapColumns - 1, mapRows - 1, 2]
-  //   );
-  // } else {
-  //   // axial
-  //   const unitsPerSlice = gridMapDimensions[2] / numSlices;
-  //   const mapSlice = sliceIndex * unitsPerSlice;
-  //   sliceMap = getPlane(
-  //     [0, 0, mapSlice],
-  //     [mapColumns - 1, 0, mapSlice],
-  //     [0, mapRows - 1, mapSlice],
-  //     [mapColumns - 1, mapRows - 1, mapSlice]
-  //   );
-  // }
-
-  console.time('get-pixels');
+  // console.time('get-pixels');
 
   const pixels = get2DPixelsFromMap(volume.data, sliceMap);
 
-  console.timeEnd('get-pixels');
+  // console.timeEnd('get-pixels');
 
   // console.time('construct-array');
   // const pixelData = Int16Array.from(pixels);

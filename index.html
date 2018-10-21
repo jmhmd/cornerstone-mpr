@@ -28,37 +28,36 @@
   <fieldset>
     <legend>Controls</legend>
     <label for="slice">Slice <span id="slice-number"></span></label>
-    <input type="range"
+    <!-- <input type="range"
            id="slice"
            name="slice"
            value="0"
            min="1"
-           max="" />
+           max="" /> -->
+    <button type="button" id="move-pos">Move Positive</button>
+    <button type="button" id="move-neg">Move Negative</button>
 
-    <label for="axial">Axial</label>
-    <input type="radio"
-           id="axial"
-           name="axis"
-           value="axial"
-           checked />
-
-    <label for="sagittal">Sagittal</label>
-    <input type="radio"
-           id="sagittal"
-           name="axis"
-           value="sagittal" />
-
-    <label for="coronal">Coronal</label>
-    <input type="radio"
-           id="coronal"
-           name="axis"
-           value="coronal" />
-
-    <label for="oblique">Oblique</label>
-    <input type="radio"
-           id="oblique"
-           name="axis"
-           value="oblique" />
+    <label for="x-axis">x-axis <span id="x-axis-label"></span></label>
+    <input type="range"
+           id="x-axis"
+           name="x-axis"
+           value="0"
+           min="0"
+           max="360" />
+    <label for="y-axis">y-axis <span id="y-axis-label"></span></label>
+    <input type="range"
+           id="y-axis"
+           name="y-axis"
+           value="0"
+           min="0"
+           max="360" />
+    <label for="z-axis">z-axis <span id="z-axis-label"></span></label>
+    <input type="range"
+           id="z-axis"
+           name="z-axis"
+           value="0"
+           min="0"
+           max="360" />
   </fieldset>
   <div id="viewport"
        style="width: 512px; height: 512px;"></div>

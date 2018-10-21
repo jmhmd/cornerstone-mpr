@@ -1,7 +1,11 @@
-const { Vector3, Line3 } = require('three');
+import { Vector3, Line3 } from 'three';
 
-function constructVolumeBoundingBox([x, y, z]) {
-  const aabb = [
+function constructVolumeBoundingBox([x, y, z]: Array<number>): {
+  aabb: Array<Array<number>>;
+  vertices: Array<Vector3>;
+  edges: Array<Line3>;
+} {
+  const aabb: Array<Array<number>> = [
     // lower box boundary
     [
       0, // x
@@ -16,7 +20,7 @@ function constructVolumeBoundingBox([x, y, z]) {
     ],
   ];
 
-  const vertices = [
+  const vertices: Array<Vector3> = [
     new Vector3(aabb[0][0], aabb[0][1], aabb[0][2]),
     new Vector3(aabb[1][0], aabb[0][1], aabb[0][2]),
     new Vector3(aabb[1][0], aabb[1][1], aabb[0][2]),
@@ -26,7 +30,7 @@ function constructVolumeBoundingBox([x, y, z]) {
     new Vector3(aabb[1][0], aabb[1][1], aabb[1][2]),
     new Vector3(aabb[0][0], aabb[1][1], aabb[1][2]),
   ];
-  const edges = [
+  const edges: Array<Line3> = [
     new Line3(vertices[0], vertices[1]),
     new Line3(vertices[1], vertices[2]),
     new Line3(vertices[2], vertices[3]),

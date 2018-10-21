@@ -1,4 +1,4 @@
-const { Plane, Vector3, Line3, Matrix4, Math: Math3 } = require('three');
+const { Plane, Vector3, Line3 } = require('three');
 
 let cutPlane = new Plane();
 

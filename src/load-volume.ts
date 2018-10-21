@@ -53,7 +53,6 @@ function loadVolume(stack: any, images: Array<any>) {
   const minPixelDimension = Math.min(xPixelWidth, yPixelWidth, zPixelWidth);
 
   console.log('pixel spacing:', xPixelWidth, yPixelWidth, zPixelWidth);
-  console.timeEnd('load');
 
   console.time('buildvol');
   const volumeArrays: Array<Array<number>> = loadedImages.map((image: any) => {
