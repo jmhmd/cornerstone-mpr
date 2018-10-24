@@ -3,6 +3,24 @@ import { get3dCoplanarBoundingBox } from './get-3d-coplanar-bounding-box';
 import { constructVolumeBoundingBox } from './construct-volume-bounding-box';
 import { toVector3 } from './convert-to-three-object';
 
+function getPlaneBoxIntersections(edges: Array<Line3>, plane: Plane): Array<Vector3> {
+  const intersections: Array<any> = [];
+
+  for (let i = 0; i < edges.length; i++) {
+    const edge: Line3 = edges[i];
+    const intersection: Vector3 = plane.intersectLine(edge, new Vector3());
+    if (intersection) {
+      const exists = intersections.find(i => i.equals(intersection));
+      if (!exists) {
+        // console.log('intersected', i);
+        intersections.push(intersection);
+      }
+    }
+  }
+
+  return intersections;
+}
+
 function getSlabCoordinates(
   planeNormal: Array<number> | Vector3 = [0, 0, 1], // axial
   planeNormalOrigin: Array<number> | Vector3, // 3d point [x, y, z]
@@ -18,21 +36,9 @@ function getSlabCoordinates(
     planeNormalOriginVec
   );
   const { edges }: { edges: Array<Line3> } = constructVolumeBoundingBox(volumeDimensions);
-  const intersections: Array<any> = [];
-
-  for (let i = 0; i < edges.length; i++) {
-    const edge: Line3 = edges[i];
-    const intersection: Vector3 = cutPlane.intersectLine(edge, new Vector3());
-    if (intersection) {
-      const exists = intersections.find(i => i.equals(intersection));
-      if (!exists) {
-        // console.log('intersected', i);
-        intersections.push(intersection);
-      }
-    }
-  }
+  const intersections: Array<any> = getPlaneBoxIntersections(edges, cutPlane);
 
   return get3dCoplanarBoundingBox(intersections, planeNormalVec.clone());
 }
 
-export { getSlabCoordinates };
+export { getSlabCoordinates, getPlaneBoxIntersections };

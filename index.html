@@ -41,14 +41,14 @@
     <input type="range"
            id="x-axis"
            name="x-axis"
-           value="0"
+           value="90"
            min="0"
            max="360" />
     <label for="y-axis">y-axis <span id="y-axis-label"></span></label>
     <input type="range"
            id="y-axis"
            name="y-axis"
-           value="0"
+           value="90"
            min="0"
            max="360" />
     <label for="z-axis">z-axis <span id="z-axis-label"></span></label>
@@ -60,7 +60,8 @@
            max="360" />
   </fieldset>
   <div id="viewport"
-       style="width: 512px; height: 512px;"></div>
+       style="width: 512px; height: 512px; float: left;"></div>
+  <canvas id="wireframe"></canvas>
   <script src="dist/main.js"></script>
 </body>
 

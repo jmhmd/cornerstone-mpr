@@ -7,6 +7,8 @@ const dicomParser = require('dicom-parser');
 const studies = require('../images/studies.json');
 import { movePoint } from './move-point-along-vector';
 import { degToRad } from './deg-rad';
+import { toVector3 } from './convert-to-three-object';
+import { Vector3 } from 'three';
 
 cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
 cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
@@ -35,7 +37,11 @@ const stack = {
   imageIds,
 };
 const element = document.getElementById('viewport');
-let planeNormal: Array<number> = [0, 0, 1];
+let planeNormal: Array<number> = [
+  Math.cos(degToRad(90)),
+  Math.cos(degToRad(90)),
+  Math.cos(degToRad(0)),
+];
 let planeNormalOrigin: Array<number> = [512 / 2, 512 / 2, 100];
 
 // function updateSliceRange() {
@@ -66,15 +72,15 @@ document.getElementById('move-pos').addEventListener('click', () => translateSli
 document.getElementById('move-neg').addEventListener('click', () => translateSlice(-1));
 
 function setAxis(axis: string, degrees: number) {
-  const radians: number = degToRad(degrees);
+  const cosine: number = Math.cos(degToRad(degrees));
   if (axis === 'x') {
-    planeNormal[0] = radians;
+    planeNormal[0] = cosine;
   }
   if (axis === 'y') {
-    planeNormal[1] = radians;
+    planeNormal[1] = cosine;
   }
   if (axis === 'z') {
-    planeNormal[2] = radians;
+    planeNormal[2] = cosine;
   }
   updateViewport(planeNormal, planeNormalOrigin);
 }
@@ -131,6 +137,13 @@ function updateViewport(planeNormal: Array<number>, planeNormalOrigin: Array<num
       cornerstone.displayImage(element, imageData.image);
     });
 }
+
+setInterval(() => {
+  const newPlaneNormal: Vector3 = toVector3(planeNormal);
+  newPlaneNormal.applyAxisAngle(new Vector3(1, 0, 0), degToRad(10));
+  planeNormal = [newPlaneNormal.x, newPlaneNormal.y, newPlaneNormal.z];
+  updateViewport(planeNormal, planeNormalOrigin);
+}, 200);
 
 // document.addEventListener('volume-loaded', (e: CustomEvent) => {
 //   // updateSliceRange();

@@ -1,6 +1,8 @@
 import { getSlabCoordinates } from './get-slab-coordinates';
+import { toVector3 } from './convert-to-three-object';
+import { draw } from './wireframe';
 
-const { getPlane } = require('./bresenham');
+import { getPlane } from './bresenham';
 
 function get2DPixelsFromMap(volume: any, sliceMap: Array<Array<Array<number>>>) {
   const { xPixelWidth, yPixelWidth, zPixelWidth, minPixelDimension, volumeArray } = volume;
@@ -27,11 +29,9 @@ function get2DPixelsFromMap(volume: any, sliceMap: Array<Array<Array<number>>>) 
 
 async function getImage(volume: any, opts: any) {
   const { planeNormal, planeNormalOrigin } = opts;
-  const {
-    gridMapDimensions,
-    minPixelDimension,
-    volumeArray,
-  } = volume.data;
+  const { gridMapDimensions, minPixelDimension, volumeArray } = volume.data;
+
+  draw(gridMapDimensions, toVector3(planeNormal), toVector3(planeNormalOrigin));
 
   // console.time('get-slab-coordinates');
 
@@ -46,17 +46,22 @@ async function getImage(volume: any, opts: any) {
   /**
    * Use 3D grid where 1 unit = smallest pixel spacing
    */
-  // console.time('get-plane');
+  console.time('get-plane');
 
-  const sliceMap = getPlane(...sliceBoundingBoxCoordinates);
+  const sliceMap = getPlane(
+    sliceBoundingBoxCoordinates[0], // typescript won't let me use spread operator here
+    sliceBoundingBoxCoordinates[1],
+    sliceBoundingBoxCoordinates[2],
+    sliceBoundingBoxCoordinates[3]
+  );
 
-  // console.timeEnd('get-plane');
+  console.timeEnd('get-plane');
 
-  // console.time('get-pixels');
+  console.time('get-pixels');
 
   const pixels = get2DPixelsFromMap(volume.data, sliceMap);
 
-  // console.timeEnd('get-pixels');
+  console.timeEnd('get-pixels');
 
   // console.time('construct-array');
   // const pixelData = Int16Array.from(pixels);

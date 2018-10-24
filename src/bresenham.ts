@@ -1,5 +1,3 @@
-import { isUndefined } from "util";
-
 // https://www.geeksforgeeks.org/bresenhams-algorithm-for-3-d-line-drawing/
 // http://members.chello.at/~easyfilter/bresenham.html
 
@@ -123,7 +121,7 @@ function test() {
   }
 }
 
-module.exports = {
+export {
   bresenham3D,
   getPlane,
   test,
