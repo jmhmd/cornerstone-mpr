@@ -103,7 +103,15 @@ function getPlane(
 ) {
   const firstColumn = bresenham3D(topLeft, bottomLeft);
   const lastColumn = bresenham3D(topRight, bottomRight);
-  if (firstColumn.length !== lastColumn.length) throw new Error('Plane not quadrilateral');
+  if (firstColumn.length !== lastColumn.length) {
+    // console.log(firstColumn.length, lastColumn.length);
+    // throw new Error('Plane not quadrilateral');
+    if (firstColumn.length > lastColumn.length) {
+      firstColumn.pop();
+    } else {
+      lastColumn.pop();
+    }
+  }
 
   let rows: Array<Array<Array<number>>> = [];
   for (let i = 0; i < firstColumn.length; i++) {
@@ -111,6 +119,15 @@ function getPlane(
     const endPoint = lastColumn[i];
     rows.push(bresenham3D(startPoint, endPoint));
   }
+
+  // truncate all rows to shortest length
+  const minRowLength = Math.min(...rows.map(r => r.length));
+  rows.forEach(row => {
+    if (row.length > minRowLength) {
+      const numToRemove = row.length - minRowLength;
+      row.splice(row.length - numToRemove, numToRemove);
+    }
+  });
 
   return rows;
 }
@@ -121,8 +138,4 @@ function test() {
   }
 }
 
-export {
-  bresenham3D,
-  getPlane,
-  test,
-};
+export { bresenham3D, getPlane, test };

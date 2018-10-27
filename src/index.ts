@@ -6,9 +6,9 @@ const { loadImage, addVolume } = require('./mpr-image-loader');
 const dicomParser = require('dicom-parser');
 const studies = require('../images/studies.json');
 import { movePoint } from './move-point-along-vector';
-import { degToRad } from './deg-rad';
+import { degToRad, radToDeg } from './deg-rad';
 import { toVector3 } from './convert-to-three-object';
-import { Vector3 } from 'three';
+import { Vector3, Quaternion, Euler } from 'three';
 
 cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
 cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
@@ -38,29 +38,11 @@ const stack = {
 };
 const element = document.getElementById('viewport');
 let planeNormal: Array<number> = [
-  Math.cos(degToRad(90)),
+  Math.cos(degToRad(88)),
   Math.cos(degToRad(90)),
   Math.cos(degToRad(0)),
 ];
 let planeNormalOrigin: Array<number> = [512 / 2, 512 / 2, 100];
-
-// function updateSliceRange() {
-//   const slider = (<HTMLInputElement>document.getElementById('slice'));
-//   if (axis === 'axial') {
-//     slider.max = shape[0].toString();
-//   } else if (axis === 'coronal') {
-//     slider.max = shape[1].toString();
-//   } else if (axis === 'sagittal') {
-//     slider.max = shape[2].toString();
-//   }
-// }
-
-// function updateSlice() {
-//   slice = parseInt((<HTMLInputElement>document.getElementById('slice')).value, 10) - 1;
-//   updateViewport([0, 0, 1], [0, 0, slice]);
-//   document.getElementById('slice-number').innerHTML = (slice + 1).toString();
-// }
-// document.getElementById('slice').addEventListener('input', updateSlice);
 
 function translateSlice(direction: number) {
   const distance = 1;
@@ -71,32 +53,36 @@ function translateSlice(direction: number) {
 document.getElementById('move-pos').addEventListener('click', () => translateSlice(1));
 document.getElementById('move-neg').addEventListener('click', () => translateSlice(-1));
 
-function setAxis(axis: string, degrees: number) {
-  const cosine: number = Math.cos(degToRad(degrees));
-  if (axis === 'x') {
-    planeNormal[0] = cosine;
-  }
-  if (axis === 'y') {
-    planeNormal[1] = cosine;
-  }
-  if (axis === 'z') {
-    planeNormal[2] = cosine;
-  }
+function setAxis([x, y, z]: [number, number, number]) {
+  const deltaRotationQuaternion = new Quaternion().setFromEuler(
+    new Euler(degToRad(y * 1), degToRad(x * 1), degToRad(z * 1), 'XYZ')
+  );
+
+  const planeNormalVec = toVector3(planeNormal);
+  planeNormalVec.applyQuaternion(deltaRotationQuaternion);
+  planeNormal = [planeNormalVec.x, planeNormalVec.y, planeNormalVec.z];
   updateViewport(planeNormal, planeNormalOrigin);
 }
+let currentDegrees = [radToDeg(planeNormal[0]), radToDeg(planeNormal[1]), radToDeg(planeNormal[2])];
 document.getElementById('x-axis').addEventListener('input', (e: Event) => {
-  const degrees = parseInt((<HTMLInputElement>event.target).value, 10);
-  setAxis('x', degrees);
+  const degrees = parseInt((<HTMLInputElement>e.target).value, 10);
+  const degToMove = degrees - currentDegrees[0];
+  setAxis([degToMove, 0, 0]);
+  currentDegrees[0] = degrees;
   document.getElementById('x-axis-label').innerHTML = degrees.toString();
 });
 document.getElementById('y-axis').addEventListener('input', (e: Event) => {
-  const degrees = parseInt((<HTMLInputElement>event.target).value, 10);
-  setAxis('y', degrees);
+  const degrees = parseInt((<HTMLInputElement>e.target).value, 10);
+  const degToMove = degrees - currentDegrees[1];
+  setAxis([0, degToMove, 0]);
+  currentDegrees[1] = degrees;
   document.getElementById('y-axis-label').innerHTML = degrees.toString();
 });
 document.getElementById('z-axis').addEventListener('input', (e: Event) => {
-  const degrees = parseInt((<HTMLInputElement>event.target).value, 10);
-  setAxis('z', degrees);
+  const degrees = parseInt((<HTMLInputElement>e.target).value, 10);
+  const degToMove = degrees - currentDegrees[2];
+  setAxis([0, 0, degToMove]);
+  currentDegrees[2] = degrees;
   document.getElementById('z-axis-label').innerHTML = degrees.toString();
 });
 
@@ -116,6 +102,7 @@ function main() {
     .loadImage(volumeId, {
       planeNormal,
       planeNormalOrigin,
+      drawBox: (<HTMLInputElement>document.getElementById('draw-box')).checked,
     })
     .then(function(imageData: any) {
       // console.log(imageData);
@@ -126,25 +113,22 @@ function main() {
 main();
 
 function updateViewport(planeNormal: Array<number>, planeNormalOrigin: Array<number>) {
-  // console.time('slicetotal');
+  console.time('slicetotal');
   cornerstone
     .loadImage(volumeId, {
       planeNormal,
       planeNormalOrigin,
+      drawBox: (<HTMLInputElement>document.getElementById('draw-box')).checked,
     })
     .then(function(imageData: any) {
-      // console.timeEnd('slicetotal');
+      console.timeEnd('slicetotal');
       cornerstone.displayImage(element, imageData.image);
     });
 }
 
-setInterval(() => {
-  const newPlaneNormal: Vector3 = toVector3(planeNormal);
-  newPlaneNormal.applyAxisAngle(new Vector3(1, 0, 0), degToRad(10));
-  planeNormal = [newPlaneNormal.x, newPlaneNormal.y, newPlaneNormal.z];
-  updateViewport(planeNormal, planeNormalOrigin);
-}, 200);
-
-// document.addEventListener('volume-loaded', (e: CustomEvent) => {
-//   // updateSliceRange();
-// });
+// setInterval(() => {
+//   const newPlaneNormal: Vector3 = toVector3(planeNormal);
+//   newPlaneNormal.applyAxisAngle(new Vector3(1, 0, 0), degToRad(10));
+//   planeNormal = [newPlaneNormal.x, newPlaneNormal.y, newPlaneNormal.z];
+//   updateViewport(planeNormal, planeNormalOrigin);
+// }, 200);

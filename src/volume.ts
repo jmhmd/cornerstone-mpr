@@ -31,9 +31,11 @@ async function getImage(volume: any, opts: any) {
   const { planeNormal, planeNormalOrigin } = opts;
   const { gridMapDimensions, minPixelDimension, volumeArray } = volume.data;
 
-  draw(gridMapDimensions, toVector3(planeNormal), toVector3(planeNormalOrigin));
+  if (opts.drawBox) {
+    draw(gridMapDimensions, toVector3(planeNormal), toVector3(planeNormalOrigin));
+  }
 
-  // console.time('get-slab-coordinates');
+  console.time('get-slab-coordinates');
 
   const sliceBoundingBoxCoordinates = getSlabCoordinates(
     planeNormal,
@@ -41,18 +43,20 @@ async function getImage(volume: any, opts: any) {
     gridMapDimensions
   );
 
-  // console.timeEnd('get-slab-coordinates');
+  console.timeEnd('get-slab-coordinates');
 
   /**
    * Use 3D grid where 1 unit = smallest pixel spacing
    */
   console.time('get-plane');
 
+  // bounding box coordinates are counterclockwise? not sure exactly where this orientation is
+  // determined.
   const sliceMap = getPlane(
-    sliceBoundingBoxCoordinates[0], // typescript won't let me use spread operator here
+    sliceBoundingBoxCoordinates[0],
+    sliceBoundingBoxCoordinates[3],
     sliceBoundingBoxCoordinates[1],
-    sliceBoundingBoxCoordinates[2],
-    sliceBoundingBoxCoordinates[3]
+    sliceBoundingBoxCoordinates[2]
   );
 
   console.timeEnd('get-plane');
