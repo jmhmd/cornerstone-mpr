@@ -29,7 +29,7 @@ console.log('cornerstone:', cornerstone);
 console.log('cornerstoneTools:', cornerstoneTools);
 
 const volumeId = 'mprLoader:t1-brain';
-const imageIds: Array<string> = studies['t1-brain'];
+const imageIds: Array<string> = studies['ax-lung'];
 const imageRoot = location.origin + location.pathname;
 imageIds.forEach(id => imageRoot + id);
 const stack = {

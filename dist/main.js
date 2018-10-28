@@ -57464,7 +57464,7 @@ console.log('wadoimageloader:', cornerstoneWADOImageLoader);
 console.log('cornerstone:', cornerstone);
 console.log('cornerstoneTools:', cornerstoneTools);
 const volumeId = 'mprLoader:t1-brain';
-const imageIds = studies['t1-brain'];
+const imageIds = studies['ax-lung'];
 const imageRoot = location.origin + location.pathname;
 imageIds.forEach(id => imageRoot + id);
 const stack = {
