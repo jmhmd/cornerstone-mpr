@@ -1,6 +1,7 @@
 const { getImage } = require('./volume');
 const { loadVolume } = require('./load-volume');
 const cornerstone = require('cornerstone-core');
+const pMap = require('p-map');
 
 const volumeCache: any = {};
 
@@ -14,8 +15,8 @@ function addVolume(volumeId: string, stack: any) {
   volumeCache[volumeId] = volume;
 
   // load all images
-  Promise.all(imageIds.map(cornerstone.loadImage))
-    .then(images => {
+  pMap(imageIds, cornerstone.loadImage, { concurrency: 2 })
+    .then((images: any) => {
       volume.data = loadVolume(stack, images);
       console.log(`loaded ${images.length} images`);
       cornerstone.events.dispatchEvent({
@@ -25,7 +26,7 @@ function addVolume(volumeId: string, stack: any) {
         },
       });
     })
-    .catch(err => {
+    .catch((err: any) => {
       throw err;
     });
 

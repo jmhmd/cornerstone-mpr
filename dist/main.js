@@ -8886,6 +8886,89 @@ module.exports = wrappedNDArrayCtor
 
 /***/ }),
 
+/***/ "./node_modules/p-map/index.js":
+/*!*************************************!*\
+  !*** ./node_modules/p-map/index.js ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+const pMap = (iterable, mapper, options) => new Promise((resolve, reject) => {
+	options = Object.assign({
+		concurrency: Infinity
+	}, options);
+
+	if (typeof mapper !== 'function') {
+		throw new TypeError('Mapper function is required');
+	}
+
+	const {concurrency} = options;
+
+	if (!(typeof concurrency === 'number' && concurrency >= 1)) {
+		throw new TypeError(`Expected \`concurrency\` to be a number from 1 and up, got \`${concurrency}\` (${typeof concurrency})`);
+	}
+
+	const ret = [];
+	const iterator = iterable[Symbol.iterator]();
+	let isRejected = false;
+	let isIterableDone = false;
+	let resolvingCount = 0;
+	let currentIndex = 0;
+
+	const next = () => {
+		if (isRejected) {
+			return;
+		}
+
+		const nextItem = iterator.next();
+		const i = currentIndex;
+		currentIndex++;
+
+		if (nextItem.done) {
+			isIterableDone = true;
+
+			if (resolvingCount === 0) {
+				resolve(ret);
+			}
+
+			return;
+		}
+
+		resolvingCount++;
+
+		Promise.resolve(nextItem.value)
+			.then(element => mapper(element, i))
+			.then(
+				value => {
+					ret[i] = value;
+					resolvingCount--;
+					next();
+				},
+				error => {
+					isRejected = true;
+					reject(error);
+				}
+			);
+	};
+
+	for (let i = 0; i < concurrency; i++) {
+		next();
+
+		if (isIterableDone) {
+			break;
+		}
+	}
+});
+
+module.exports = pMap;
+module.exports.default = pMap;
+
+
+/***/ }),
+
 /***/ "./node_modules/three/build/three.module.js":
 /*!**************************************************!*\
   !*** ./node_modules/three/build/three.module.js ***!
@@ -57622,6 +57705,7 @@ __webpack_require__.r(__webpack_exports__);
 const { getImage } = __webpack_require__(/*! ./volume */ "./src/volume.ts");
 const { loadVolume } = __webpack_require__(/*! ./load-volume */ "./src/load-volume.ts");
 const cornerstone = __webpack_require__(/*! cornerstone-core */ "./node_modules/cornerstone-core/dist/cornerstone.js");
+const pMap = __webpack_require__(/*! p-map */ "./node_modules/p-map/index.js");
 const volumeCache = {};
 function addVolume(volumeId, stack) {
     const { imageIds } = stack;
@@ -57632,8 +57716,8 @@ function addVolume(volumeId, stack) {
     };
     volumeCache[volumeId] = volume;
     // load all images
-    Promise.all(imageIds.map(cornerstone.loadImage))
-        .then(images => {
+    pMap(imageIds, cornerstone.loadImage, { concurrency: 2 })
+        .then((images) => {
         volume.data = loadVolume(stack, images);
         console.log(`loaded ${images.length} images`);
         cornerstone.events.dispatchEvent({
@@ -57643,7 +57727,7 @@ function addVolume(volumeId, stack) {
             },
         });
     })
-        .catch(err => {
+        .catch((err) => {
         throw err;
     });
     // function onImageCached(e: any) {

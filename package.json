@@ -26,6 +26,7 @@
     "cornerstone-wado-image-loader": "^2.1.4",
     "dicom-parser": "^1.8.1",
     "ndarray": "^1.0.18",
+    "p-map": "^2.0.0",
     "quickhull3d": "^2.0.4",
     "rotating-calipers": "^0.0.0",
     "three": "^0.97.0",
