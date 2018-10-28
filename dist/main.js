@@ -57369,10 +57369,10 @@ cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
 cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
 cornerstoneTools.external.cornerstone = cornerstone;
 var config = {
-    webWorkerPath: 'node_modules/cornerstone-wado-image-loader/dist/cornerstoneWADOImageLoaderWebWorker.js',
+    webWorkerPath: 'lib/cornerstoneWADOImageLoaderWebWorker.js',
     taskConfiguration: {
         decodeTask: {
-            codecsPath: '../dist/cornerstoneWADOImageLoaderCodecs.js',
+            codecsPath: 'cornerstoneWADOImageLoaderCodecs.js',
         },
     },
 };
@@ -57382,6 +57382,8 @@ console.log('cornerstone:', cornerstone);
 console.log('cornerstoneTools:', cornerstoneTools);
 const volumeId = 'mprLoader:t1-brain';
 const imageIds = studies['t1-brain'];
+const imageRoot = location.origin + location.pathname;
+imageIds.forEach(id => imageRoot + id);
 const stack = {
     volumeId,
     currentImageIdIndex: 0,
