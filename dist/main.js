@@ -57474,9 +57474,10 @@ const stack = {
 };
 const element = document.getElementById('viewport');
 let planeNormal = [
-    Math.cos(Object(_deg_rad__WEBPACK_IMPORTED_MODULE_1__["degToRad"])(88)),
-    Math.cos(Object(_deg_rad__WEBPACK_IMPORTED_MODULE_1__["degToRad"])(90)),
-    Math.cos(Object(_deg_rad__WEBPACK_IMPORTED_MODULE_1__["degToRad"])(0)),
+    // Math.cos(degToRad(90)),
+    // Math.cos(degToRad(90)),
+    // Math.cos(degToRad(0)),
+    0, 0, 1
 ];
 let planeNormalOrigin = [512 / 2, 512 / 2, 100];
 function translateSlice(direction) {

@@ -39,9 +39,10 @@ const stack = {
 };
 const element = document.getElementById('viewport');
 let planeNormal: Array<number> = [
-  Math.cos(degToRad(88)),
-  Math.cos(degToRad(90)),
-  Math.cos(degToRad(0)),
+  // Math.cos(degToRad(90)),
+  // Math.cos(degToRad(90)),
+  // Math.cos(degToRad(0)),
+  0, 0, 1
 ];
 let planeNormalOrigin: Array<number> = [512 / 2, 512 / 2, 100];
 
