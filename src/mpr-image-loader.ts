@@ -14,17 +14,31 @@ function addVolume(volumeId: string, stack: any) {
   };
   volumeCache[volumeId] = volume;
 
+  let loadedImages = 0;
+  function onImageLoaded (e: any) {
+    loadedImages += 1;
+    cornerstone.events.dispatchEvent({
+      type: 'cornerstonevolumeloadprogress',
+      data: {
+        loaded: loadedImages,
+        total: imageIds.length,
+      },
+    });
+  }
+  cornerstone.events.addEventListener(`cornerstoneimageloaded`, onImageLoaded);
+
   // load all images
   pMap(imageIds, cornerstone.loadImage, { concurrency: 2 })
     .then((images: any) => {
       volume.data = loadVolume(stack, images);
       console.log(`loaded ${images.length} images`);
       cornerstone.events.dispatchEvent({
-        type: `cornerstonemprvolumeready`,
+        type: 'cornerstonemprvolumeready',
         data: {
           volumeId,
         },
       });
+      cornerstone.events.removeEventListener(`cornerstoneimageloaded`, onImageLoaded);
     })
     .catch((err: any) => {
       throw err;

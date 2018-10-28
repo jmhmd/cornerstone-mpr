@@ -27,14 +27,13 @@ function get2DPixelsFromMap(volume: any, sliceMap: Array<Array<Array<number>>>) 
   return pixels;
 }
 
-async function getImage(volume: any, opts: any) {
-  const { planeNormal, planeNormalOrigin } = opts;
-  const { gridMapDimensions, minPixelDimension, volumeArray } = volume.data;
-
-  if (opts.drawBox) {
-    draw(gridMapDimensions, toVector3(planeNormal), toVector3(planeNormalOrigin));
-  }
-
+function getPixelSlice(
+  planeNormal: Array<number>,
+  planeNormalOrigin: Array<number>,
+  volume: any,
+  dimensions: Array<number>
+) {
+  const { gridMapDimensions } = volume.data;
   console.time('get-slab-coordinates');
 
   const sliceBoundingBoxCoordinates = getSlabCoordinates(
@@ -61,11 +60,42 @@ async function getImage(volume: any, opts: any) {
 
   console.timeEnd('get-plane');
 
+  if (dimensions[0]) {
+    const maxCols = dimensions[1];
+    const maxRows = dimensions[0];
+    sliceMap.forEach(row => {
+      if (row.length > maxCols) {
+        const numToRemove = row.length - maxCols;
+        row.splice(row.length - numToRemove, numToRemove);
+      }
+    });
+    if (sliceMap.length > maxRows) {
+      const numToRemove = sliceMap.length - maxRows;
+      sliceMap.splice(sliceMap.length - numToRemove, numToRemove);
+    }
+  }
+
   console.time('get-pixels');
 
   const pixels = get2DPixelsFromMap(volume.data, sliceMap);
 
   console.timeEnd('get-pixels');
+
+  return { pixels, sliceMap };
+}
+
+
+async function getImage(volume: any, opts: any) {
+  const { planeNormal, planeNormalOrigin } = opts;
+  const { gridMapDimensions, minPixelDimension, volumeArray } = volume.data;
+  let pixels: Int16Array;
+  let sliceMap;
+
+  if (opts.drawBox) {
+    draw(gridMapDimensions, toVector3(planeNormal), toVector3(planeNormalOrigin));
+  }
+
+  ({ pixels, sliceMap } = getPixelSlice(planeNormal, planeNormalOrigin, volume, []));
 
   // console.time('construct-array');
   // const pixelData = Int16Array.from(pixels);

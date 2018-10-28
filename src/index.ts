@@ -8,15 +8,14 @@ const studies = require('../images/studies.json');
 import { movePoint } from './move-point-along-vector';
 import { degToRad, radToDeg } from './deg-rad';
 import { toVector3 } from './convert-to-three-object';
-import { Vector3, Quaternion, Euler } from 'three';
+import { Quaternion, Euler } from 'three';
 
 cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
 cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
 cornerstoneTools.external.cornerstone = cornerstone;
 
 var config = {
-  webWorkerPath:
-    'lib/cornerstoneWADOImageLoaderWebWorker.js',
+  webWorkerPath: 'lib/cornerstoneWADOImageLoaderWebWorker.js',
   taskConfiguration: {
     decodeTask: {
       codecsPath: 'cornerstoneWADOImageLoaderCodecs.js',
@@ -127,6 +126,10 @@ function updateViewport(planeNormal: Array<number>, planeNormalOrigin: Array<num
       cornerstone.displayImage(element, imageData.image);
     });
 }
+
+cornerstone.events.addEventListener('cornerstonevolumeloadprogress', (e: any) => {
+  document.getElementById('images-loaded').innerHTML = `Loaded ${e.data.loaded} of ${e.data.total}`;
+});
 
 // setInterval(() => {
 //   const newPlaneNormal: Vector3 = toVector3(planeNormal);

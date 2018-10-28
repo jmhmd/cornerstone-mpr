@@ -57552,6 +57552,9 @@ function updateViewport(planeNormal, planeNormalOrigin) {
         cornerstone.displayImage(element, imageData.image);
     });
 }
+cornerstone.events.addEventListener('cornerstonevolumeloadprogress', (e) => {
+    document.getElementById('images-loaded').innerHTML = `Loaded ${e.data.loaded} of ${e.data.total}`;
+});
 // setInterval(() => {
 //   const newPlaneNormal: Vector3 = toVector3(planeNormal);
 //   newPlaneNormal.applyAxisAngle(new Vector3(1, 0, 0), degToRad(10));
@@ -57605,14 +57608,11 @@ function loadVolume(stack, images) {
     });
     const numSlices = imageIds.length;
     const firstImage = loadedImages[0];
-    const lastImage = loadedImages[loadedImages.length - 1];
-    const imageSizeInBytes = firstImage.sizeInBytes;
+    // const zPositions = loadedImages.map(i => i.imagePositionPatient[2]);
+    // const imageSizeInBytes = firstImage.sizeInBytes;
     const xPixelWidth = firstImage.columnPixelSpacing;
     const yPixelWidth = firstImage.rowPixelSpacing;
     const zPixelWidth = firstImage.data.floatString('x00180050'); // Slice Thickness
-    // const zPixelWidth =
-    //   Math.abs(lastImage.imagePositionPatient[2] - firstImage.imagePositionPatient[2]) /
-    //   numSlices;
     const minPixelDimension = Math.min(xPixelWidth, yPixelWidth, zPixelWidth);
     console.log('pixel spacing:', xPixelWidth, yPixelWidth, zPixelWidth);
     console.time('buildvol');
@@ -57715,17 +57715,30 @@ function addVolume(volumeId, stack) {
         data: {},
     };
     volumeCache[volumeId] = volume;
+    let loadedImages = 0;
+    function onImageLoaded(e) {
+        loadedImages += 1;
+        cornerstone.events.dispatchEvent({
+            type: 'cornerstonevolumeloadprogress',
+            data: {
+                loaded: loadedImages,
+                total: imageIds.length,
+            },
+        });
+    }
+    cornerstone.events.addEventListener(`cornerstoneimageloaded`, onImageLoaded);
     // load all images
     pMap(imageIds, cornerstone.loadImage, { concurrency: 2 })
         .then((images) => {
         volume.data = loadVolume(stack, images);
         console.log(`loaded ${images.length} images`);
         cornerstone.events.dispatchEvent({
-            type: `cornerstonemprvolumeready`,
+            type: 'cornerstonemprvolumeready',
             data: {
                 volumeId,
             },
         });
+        cornerstone.events.removeEventListener(`cornerstoneimageloaded`, onImageLoaded);
     })
         .catch((err) => {
         throw err;
@@ -58203,12 +58216,8 @@ function get2DPixelsFromMap(volume, sliceMap) {
     }
     return pixels;
 }
-async function getImage(volume, opts) {
-    const { planeNormal, planeNormalOrigin } = opts;
-    const { gridMapDimensions, minPixelDimension, volumeArray } = volume.data;
-    if (opts.drawBox) {
-        Object(_wireframe__WEBPACK_IMPORTED_MODULE_2__["draw"])(gridMapDimensions, Object(_convert_to_three_object__WEBPACK_IMPORTED_MODULE_1__["toVector3"])(planeNormal), Object(_convert_to_three_object__WEBPACK_IMPORTED_MODULE_1__["toVector3"])(planeNormalOrigin));
-    }
+function getPixelSlice(planeNormal, planeNormalOrigin, volume, dimensions) {
+    const { gridMapDimensions } = volume.data;
     console.time('get-slab-coordinates');
     const sliceBoundingBoxCoordinates = Object(_get_slab_coordinates__WEBPACK_IMPORTED_MODULE_0__["getSlabCoordinates"])(planeNormal, planeNormalOrigin, gridMapDimensions);
     console.timeEnd('get-slab-coordinates');
@@ -58220,9 +58229,34 @@ async function getImage(volume, opts) {
     // determined.
     const sliceMap = Object(_bresenham__WEBPACK_IMPORTED_MODULE_3__["getPlane"])(sliceBoundingBoxCoordinates[0], sliceBoundingBoxCoordinates[3], sliceBoundingBoxCoordinates[1], sliceBoundingBoxCoordinates[2]);
     console.timeEnd('get-plane');
+    if (dimensions[0]) {
+        const maxCols = dimensions[1];
+        const maxRows = dimensions[0];
+        sliceMap.forEach(row => {
+            if (row.length > maxCols) {
+                const numToRemove = row.length - maxCols;
+                row.splice(row.length - numToRemove, numToRemove);
+            }
+        });
+        if (sliceMap.length > maxRows) {
+            const numToRemove = sliceMap.length - maxRows;
+            sliceMap.splice(sliceMap.length - numToRemove, numToRemove);
+        }
+    }
     console.time('get-pixels');
     const pixels = get2DPixelsFromMap(volume.data, sliceMap);
     console.timeEnd('get-pixels');
+    return { pixels, sliceMap };
+}
+async function getImage(volume, opts) {
+    const { planeNormal, planeNormalOrigin } = opts;
+    const { gridMapDimensions, minPixelDimension, volumeArray } = volume.data;
+    let pixels;
+    let sliceMap;
+    if (opts.drawBox) {
+        Object(_wireframe__WEBPACK_IMPORTED_MODULE_2__["draw"])(gridMapDimensions, Object(_convert_to_three_object__WEBPACK_IMPORTED_MODULE_1__["toVector3"])(planeNormal), Object(_convert_to_three_object__WEBPACK_IMPORTED_MODULE_1__["toVector3"])(planeNormalOrigin));
+    }
+    ({ pixels, sliceMap } = getPixelSlice(planeNormal, planeNormalOrigin, volume, []));
     // console.time('construct-array');
     // const pixelData = Int16Array.from(pixels);
     // console.timeEnd('construct-array');

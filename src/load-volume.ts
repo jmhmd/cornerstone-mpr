@@ -41,15 +41,12 @@ function loadVolume(stack: any, images: Array<any>) {
   const numSlices = imageIds.length;
 
   const firstImage = loadedImages[0];
-  const lastImage = loadedImages[loadedImages.length - 1];
-  const imageSizeInBytes = firstImage.sizeInBytes;
+  // const zPositions = loadedImages.map(i => i.imagePositionPatient[2]);
+  // const imageSizeInBytes = firstImage.sizeInBytes;
 
   const xPixelWidth = firstImage.columnPixelSpacing;
   const yPixelWidth = firstImage.rowPixelSpacing;
   const zPixelWidth = firstImage.data.floatString('x00180050'); // Slice Thickness
-  // const zPixelWidth =
-  //   Math.abs(lastImage.imagePositionPatient[2] - firstImage.imagePositionPatient[2]) /
-  //   numSlices;
   const minPixelDimension = Math.min(xPixelWidth, yPixelWidth, zPixelWidth);
 
   console.log('pixel spacing:', xPixelWidth, yPixelWidth, zPixelWidth);
